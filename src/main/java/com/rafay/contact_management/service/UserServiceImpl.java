@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import javax.management.RuntimeErrorException;
 
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,10 +23,9 @@ import com.rafay.contact_management.security.JwtUtil;
 import com.rafay.contact_management.util.MappingUtil;
 
 import lombok.Builder;
-import lombok.RequiredArgsConstructor;
+
 
 @Service
-@RequiredArgsConstructor
 @Builder
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
@@ -33,6 +33,14 @@ public class UserServiceImpl implements UserService {
     private final MappingUtil mappingUtil;
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
+
+    public UserServiceImpl(UserRepository userRepository,PasswordEncoder passwordEncoder,MappingUtil mappingUtil, JwtUtil jwtUtil, @Lazy AuthenticationManager authenticationManager){
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.authenticationManager = authenticationManager;
+        this.jwtUtil = jwtUtil;
+        this.mappingUtil = mappingUtil;
+    }
 
     @Override
     public UserDTO createUser(RegisterRequest request){

@@ -10,7 +10,7 @@ import com.rafay.contact_management.dto.UserDTO;
 public interface UserService extends UserDetailsService{
     UserDTO createUser(RegisterRequest request);
     AuthResponse  loginUser(LoginRequest request);
-    void changePassword(Long id,String newPassword);
+    //void changePassword(Long id,String newPassword);
 
     
 }
