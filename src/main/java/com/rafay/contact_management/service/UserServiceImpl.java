@@ -1,10 +1,16 @@
 package com.rafay.contact_management.service;
 
+import java.util.ArrayList;
+
 import javax.management.RuntimeErrorException;
 
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.rafay.contact_management.dto.AuthResponse;
+import com.rafay.contact_management.dto.LoginRequest;
 import com.rafay.contact_management.dto.RegisterRequest;
 import com.rafay.contact_management.dto.UserDTO;
 import com.rafay.contact_management.model.User;
@@ -29,6 +35,17 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         User savedUser = userRepository.save(user);
         return mappingUtil.toUserDTO(savedUser);
+
+    }
+    @Override
+    public UserDetails loadUserByUsername(String username){
+        User user = userRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        return org.springframework.security.core.userdetails.User.withUsername(user.getEmail()).password(user.getPassword()).authorities(new ArrayList<>()).build();
+    }
+
+    @Override
+    public AuthResponse loginUser(LoginRequest request){
+        
 
     }
 }
