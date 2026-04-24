@@ -1,9 +1,7 @@
 package com.rafay.contact_management.service;
 
 import java.util.ArrayList;
-import java.util.Optional;
 
-import javax.management.RuntimeErrorException;
 
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
