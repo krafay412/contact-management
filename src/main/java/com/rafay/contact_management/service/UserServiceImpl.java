@@ -1,9 +1,12 @@
 package com.rafay.contact_management.service;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 import javax.management.RuntimeErrorException;
 
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,16 +18,21 @@ import com.rafay.contact_management.dto.RegisterRequest;
 import com.rafay.contact_management.dto.UserDTO;
 import com.rafay.contact_management.model.User;
 import com.rafay.contact_management.repository.UserRepository;
+import com.rafay.contact_management.security.JwtUtil;
 import com.rafay.contact_management.util.MappingUtil;
 
+import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Builder
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final MappingUtil mappingUtil;
+    private final JwtUtil jwtUtil;
+    private final AuthenticationManager authenticationManager;
 
     @Override
     public UserDTO createUser(RegisterRequest request){
@@ -45,7 +53,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public AuthResponse loginUser(LoginRequest request){
-        
-
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+        User user = userRepository.findByEmail(request.getEmail())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+        String token = jwtUtil.generateToken(user.getUsername());
+        AuthResponse response = AuthResponse.builder().accessToken(token).tokenType("Bearer").username(user.getUsername()).build();
+        return response;
     }
 }
