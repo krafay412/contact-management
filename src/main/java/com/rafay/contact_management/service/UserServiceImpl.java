@@ -62,7 +62,7 @@ public class UserServiceImpl implements UserService {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
         User user = userRepository.findByEmail(request.getEmail())
                     .orElseThrow(() -> new RuntimeException("User not found"));
-        String token = jwtUtil.generateToken(user.getUsername());
+        String token = jwtUtil.generateToken(user.getEmail());
         AuthResponse response = AuthResponse.builder().accessToken(token).tokenType("Bearer").username(user.getUsername()).build();
         return response;
     }
@@ -70,5 +70,11 @@ public class UserServiceImpl implements UserService {
     public User findByEmail(String email){
         User user = userRepository.findByEmail(email).orElseThrow(()->new RuntimeException("User Not Found"));
         return user;
+    }
+    @Override
+    public void changePassword(Long id,String newPassword){
+           User user = userRepository.findById(id).orElseThrow(()->new RuntimeException("User Not Found"));
+           user.setPassword(passwordEncoder.encode(newPassword));
+           userRepository.save(user);
     }
 }

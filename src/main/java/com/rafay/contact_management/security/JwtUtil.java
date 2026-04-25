@@ -21,9 +21,9 @@ public class JwtUtil {
     @Value("${jwt.expiration}")
     private Long expiry;
 
-    public String generateToken(String username){
+    public String generateToken(String email){
         return Jwts.builder()
-                .subject(username)
+                .subject(email)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiry))
                 .signWith(getSigningKey())

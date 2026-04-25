@@ -11,7 +11,7 @@ import com.rafay.contact_management.model.User;
 public interface UserService extends UserDetailsService{
     UserDTO createUser(RegisterRequest request);
     AuthResponse  loginUser(LoginRequest request);
-    //void changePassword(Long id,String newPassword);
+    void changePassword(Long id,String newPassword);
     User findByEmail(String Email);
 
     

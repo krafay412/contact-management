@@ -26,7 +26,7 @@ public class Contact {
     @Column(name = "title")
     private String title;
 
-    @Column(name = "email",unique = true)
+    @Column(name = "email")
     private String email;
 
     @Column(name = "phone_number")

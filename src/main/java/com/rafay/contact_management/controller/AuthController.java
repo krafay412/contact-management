@@ -1,7 +1,9 @@
 package com.rafay.contact_management.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -10,6 +12,7 @@ import com.rafay.contact_management.dto.AuthResponse;
 import com.rafay.contact_management.dto.LoginRequest;
 import com.rafay.contact_management.dto.RegisterRequest;
 import com.rafay.contact_management.dto.UserDTO;
+import com.rafay.contact_management.model.User;
 import com.rafay.contact_management.service.UserService;
 
 import jakarta.validation.Valid;
@@ -31,5 +34,14 @@ public class AuthController {
     public ResponseEntity<AuthResponse> loginUser(@Valid @RequestBody LoginRequest request){
         AuthResponse response = userService.loginUser(request);
         return ResponseEntity.ok().body(response);
+    }
+    @PutMapping("/change-password")
+    public ResponseEntity<Void> changePassword(Authentication auth,@RequestBody String newPassword){
+        String email = auth.getName();
+        User user = userService.findByEmail(email);
+        Long id = user.getId();
+        userService.changePassword(id, newPassword);
+        return ResponseEntity.noContent().build();
+
     }
 }
