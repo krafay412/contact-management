@@ -66,4 +66,9 @@ public class UserServiceImpl implements UserService {
         AuthResponse response = AuthResponse.builder().accessToken(token).tokenType("Bearer").username(user.getUsername()).build();
         return response;
     }
+    @Override
+    public User findByEmail(String email){
+        User user = userRepository.findByEmail(email).orElseThrow(()->new RuntimeException("User Not Found"));
+        return user;
+    }
 }
