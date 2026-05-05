@@ -1,12 +1,20 @@
 package com.rafay.contact_management.util;
 
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Component;
 
 import com.rafay.contact_management.dto.ContactDTO;
+import com.rafay.contact_management.dto.ContactEmailDTO;
+import com.rafay.contact_management.dto.ContactPhoneDTO;
 import com.rafay.contact_management.dto.ContactRequest;
+import com.rafay.contact_management.dto.EmailRequest;
+import com.rafay.contact_management.dto.PhoneRequest;
 import com.rafay.contact_management.dto.RegisterRequest;
 import com.rafay.contact_management.dto.UserDTO;
 import com.rafay.contact_management.model.Contact;
+import com.rafay.contact_management.model.ContactEmail;
+import com.rafay.contact_management.model.ContactPhone;
 import com.rafay.contact_management.model.User;
 
 @Component
@@ -31,20 +39,46 @@ public class MappingUtil {
     }
     public ContactDTO toContactDTO(Contact contact){
         ContactDTO dto = new ContactDTO();
-        dto.setEmail(contact.getEmail());
+        dto.setEmails(contact.getContactEmail().stream().map(this::toContactEmailDTO).collect(Collectors.toList()));
         dto.setFirstName(contact.getFirstName());
         dto.setLastName(contact.getLastName());
-        dto.setPhoneNumber(contact.getPhoneNumber());
+        dto.setPhones(contact.getContactPhone().stream().map(this::toContactPhoneDTO).collect(Collectors.toList()));
         dto.setTitle(contact.getTitle());
         return dto;
     }
     public Contact toContact(ContactRequest request){
         Contact cont = new Contact();
-        cont.setEmail(request.getEmail());
+        //cont.setEmail(request.getEmail());
         cont.setFirstName(request.getFirstName());
         cont.setLastName(request.getLastName());
-        cont.setPhoneNumber(request.getPhoneNumber());
+        //cont.setPhoneNumber(request.getPhoneNumber());
         cont.setTitle(request.getTitle());
         return cont;
+    }
+    public ContactEmailDTO toContactEmailDTO(ContactEmail contactEmail){
+        ContactEmailDTO dto = new ContactEmailDTO();
+        dto.setEmail(contactEmail.getEmail());
+        dto.setLabel(contactEmail.getLabel());
+        return dto;
+    }
+    public ContactEmail toContactEmail(EmailRequest request){
+        ContactEmail contact = new ContactEmail();
+        contact.setEmail(request.getEmail());
+        contact.setLabel(request.getLabel());
+        return contact;
+    }
+
+    public ContactPhoneDTO toContactPhoneDTO(ContactPhone contactPhone){
+        ContactPhoneDTO dto = new ContactPhoneDTO();
+        dto.setLabel(contactPhone.getLabel());
+        dto.setPhone(contactPhone.getPhone());
+        return dto;
+    }
+    public ContactPhone toContactPhone(PhoneRequest request){
+        ContactPhone contactPhone = new ContactPhone();
+        contactPhone.setPhone(request.getPhone());
+        contactPhone.setLabel(request.getLabel());
+        return contactPhone;
+
     }
 }

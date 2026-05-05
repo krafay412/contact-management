@@ -1,5 +1,7 @@
 package com.rafay.contact_management.dto;
 
+import java.util.List;
+
 import jakarta.validation.constraints.Email;
 import lombok.Data;
 
@@ -8,8 +10,8 @@ public class ContactRequest {
     private String firstName;
     private String lastName;
     @Email(message = "Wrong Format")
-    private String email;
+    private List<EmailRequest> emails;
     private String title;
-    private String phoneNumber;
+    private List<PhoneRequest> phones;
 
 }
