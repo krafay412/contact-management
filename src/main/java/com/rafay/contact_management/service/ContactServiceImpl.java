@@ -1,9 +1,14 @@
 package com.rafay.contact_management.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
+import com.rafay.contact_management.dto.EmailRequest;
+import com.rafay.contact_management.dto.PhoneRequest;
+import com.rafay.contact_management.model.ContactEmail;
+import com.rafay.contact_management.model.ContactPhone;
 import org.springframework.stereotype.Service;
 
 import com.rafay.contact_management.dto.ContactDTO;
@@ -27,6 +32,23 @@ public class ContactServiceImpl implements ContactService{
     public ContactDTO createContact(Long userId,ContactRequest request){
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User Not Found"));
         Contact contact = mappingUtil.toContact(request);
+        List<ContactEmail> emails = new ArrayList<>();
+        for (EmailRequest email : request.getEmails()){
+            ContactEmail contactEmail = mappingUtil.toContactEmail(email);
+            contactEmail.setContact(contact);
+            emails.add(contactEmail);
+        }
+        contact.setContactEmail(emails);
+
+        List<ContactPhone> phones = new ArrayList<>();
+        for (PhoneRequest phone : request.getPhones()){
+            ContactPhone contactPhone = mappingUtil.toContactPhone(phone);
+            contactPhone.setContact(contact);
+            phones.add(contactPhone);
+        }
+        contact.setContactPhone(phones);
+
+
         contact.setUser(user);
         Contact savedContact = contactRepository.save(contact);
         return mappingUtil.toContactDTO(savedContact);
@@ -39,10 +61,21 @@ public class ContactServiceImpl implements ContactService{
             throw new RuntimeException("Invalid Request");
         }
         contact.setFirstName(request.getFirstName());
-        contact.setEmail(request.getEmail());
         contact.setLastName(request.getLastName());
-        contact.setPhoneNumber(request.getPhoneNumber());
         contact.setTitle(request.getTitle());
+        contact.getContactEmail().clear();
+        List<ContactEmail> emails = new ArrayList<>();
+        for (EmailRequest email : request.getEmails()){
+            emails.add(mappingUtil.toContactEmail(email));
+        }
+        contact.getContactEmail().addAll(emails);
+
+        contact.getContactPhone().clear();
+        List<ContactPhone> phones = new ArrayList<>();
+        for (PhoneRequest phone : request.getPhones()){
+            phones.add(mappingUtil.toContactPhone(phone));
+        }
+        contact.getContactPhone().addAll(phones);
 
         Contact savedContact = contactRepository.save(contact);
         return mappingUtil.toContactDTO(savedContact);

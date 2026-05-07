@@ -48,10 +48,8 @@ public class MappingUtil {
     }
     public Contact toContact(ContactRequest request){
         Contact cont = new Contact();
-        //cont.setEmail(request.getEmail());
         cont.setFirstName(request.getFirstName());
         cont.setLastName(request.getLastName());
-        //cont.setPhoneNumber(request.getPhoneNumber());
         cont.setTitle(request.getTitle());
         return cont;
     }
