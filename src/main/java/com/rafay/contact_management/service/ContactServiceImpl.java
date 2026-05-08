@@ -2,7 +2,6 @@ package com.rafay.contact_management.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import com.rafay.contact_management.dto.EmailRequest;
@@ -13,6 +12,8 @@ import com.rafay.contact_management.exception.UnauthorizedAccessException;
 import com.rafay.contact_management.model.ContactEmail;
 import com.rafay.contact_management.model.ContactPhone;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.rafay.contact_management.dto.ContactDTO;
@@ -121,10 +122,10 @@ public class ContactServiceImpl implements ContactService{
 
     }
     @Override
-    public List<ContactDTO> getAllContacts(Long userId){
+    public Page<ContactDTO> getAllContacts(Long userId, Pageable pageable){
         log.info("Getting Contact of {}",userId);
-        List<Contact> contacts = contactRepository.findByUserId(userId);
+        Page<Contact> contacts = contactRepository.findByUserId(userId,pageable);
         log.info("Retreived Contact for {}",userId);
-        return contacts.stream().map(mappingUtil::toContactDTO).collect(Collectors.toList());
+        return contacts.map(mappingUtil::toContactDTO);
     }
 }

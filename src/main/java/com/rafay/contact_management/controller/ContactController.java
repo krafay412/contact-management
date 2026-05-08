@@ -2,18 +2,13 @@ package com.rafay.contact_management.controller;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.config.annotation.web.headers.HeadersSecurityMarker;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.rafay.contact_management.dto.ContactDTO;
 import com.rafay.contact_management.dto.ContactRequest;
@@ -64,12 +59,11 @@ public class ContactController {
         return ResponseEntity.ok().body(contact);
     }
     @GetMapping
-    public ResponseEntity<List<ContactDTO>> getAllContacts(Authentication auth){
+    public ResponseEntity<Page<ContactDTO>> getAllContacts(Authentication auth, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
         String email = auth.getName();
         User user = userService.findByEmail(email);
-        Long userId = user.getId();
-        List<ContactDTO> contacts = contactService.getAllContacts(userId);
-        return ResponseEntity.ok().body(contacts);
+        Pageable pageable = PageRequest.of(page,size);
+        return ResponseEntity.ok().body(contactService.getAllContacts(user.getId(),pageable));
     }
 
 
