@@ -3,6 +3,8 @@ package com.rafay.contact_management.service;
 import java.util.ArrayList;
 
 
+import com.rafay.contact_management.exception.DuplicateResourceException;
+import com.rafay.contact_management.exception.ResourceNotFoundException;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,7 +26,6 @@ import lombok.Builder;
 
 
 @Service
-@Builder
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -43,7 +44,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO createUser(RegisterRequest request){
         if (userRepository.findByEmail(request.getEmail()).isPresent()){
-            throw new RuntimeException("Email Already Exist");
+            throw new DuplicateResourceException("Email Already Exist" + request.getEmail());
         }
         User user = mappingUtil.toUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -53,7 +54,7 @@ public class UserServiceImpl implements UserService {
     }
     @Override
     public UserDetails loadUserByUsername(String username){
-        User user = userRepository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        User user = userRepository.findByEmail(username).orElseThrow(() -> new ResourceNotFoundException("User not found: "+ username));
         return org.springframework.security.core.userdetails.User.withUsername(user.getEmail()).password(user.getPassword()).authorities(new ArrayList<>()).build();
     }
 
@@ -61,19 +62,19 @@ public class UserServiceImpl implements UserService {
     public AuthResponse loginUser(LoginRequest request){
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
         User user = userRepository.findByEmail(request.getEmail())
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found: " + request.getEmail()));
         String token = jwtUtil.generateToken(user.getEmail());
         AuthResponse response = AuthResponse.builder().accessToken(token).tokenType("Bearer").username(user.getUsername()).build();
         return response;
     }
     @Override
     public User findByEmail(String email){
-        User user = userRepository.findByEmail(email).orElseThrow(()->new RuntimeException("User Not Found"));
+        User user = userRepository.findByEmail(email).orElseThrow(()->new ResourceNotFoundException("User Not Found: " + email));
         return user;
     }
     @Override
     public void changePassword(Long id,String newPassword){
-           User user = userRepository.findById(id).orElseThrow(()->new RuntimeException("User Not Found"));
+           User user = userRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("User Not Found: " + id));
            user.setPassword(passwordEncoder.encode(newPassword));
            userRepository.save(user);
     }
