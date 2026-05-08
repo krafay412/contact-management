@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import com.rafay.contact_management.exception.DuplicateResourceException;
 import com.rafay.contact_management.exception.ResourceNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,7 +25,7 @@ import com.rafay.contact_management.util.MappingUtil;
 
 import lombok.Builder;
 
-
+@Slf4j
 @Service
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
@@ -43,12 +44,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO createUser(RegisterRequest request){
+        log.info("Registering new user with email: {}", request.getEmail());
         if (userRepository.findByEmail(request.getEmail()).isPresent()){
             throw new DuplicateResourceException("Email Already Exist" + request.getEmail());
         }
         User user = mappingUtil.toUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         User savedUser = userRepository.save(user);
+        log.info("User Registered Successfully {}",savedUser.getEmail());
         return mappingUtil.toUserDTO(savedUser);
 
     }
@@ -60,11 +63,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public AuthResponse loginUser(LoginRequest request){
+        log.info("Logging in {}",request.getEmail());
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
         User user = userRepository.findByEmail(request.getEmail())
                     .orElseThrow(() -> new ResourceNotFoundException("User not found: " + request.getEmail()));
         String token = jwtUtil.generateToken(user.getEmail());
         AuthResponse response = AuthResponse.builder().accessToken(token).tokenType("Bearer").username(user.getUsername()).build();
+        log.info("logged in {}",user.getEmail());
         return response;
     }
     @Override
@@ -74,8 +79,10 @@ public class UserServiceImpl implements UserService {
     }
     @Override
     public void changePassword(Long id,String newPassword){
+        log.info("Changing Password For {}",id);
            User user = userRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("User Not Found: " + id));
            user.setPassword(passwordEncoder.encode(newPassword));
            userRepository.save(user);
+           log.info("Password Changed For : {}",user.getEmail());
     }
 }

@@ -12,6 +12,7 @@ import com.rafay.contact_management.exception.ResourceNotFoundException;
 import com.rafay.contact_management.exception.UnauthorizedAccessException;
 import com.rafay.contact_management.model.ContactEmail;
 import com.rafay.contact_management.model.ContactPhone;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import com.rafay.contact_management.dto.ContactDTO;
@@ -24,6 +25,7 @@ import com.rafay.contact_management.util.MappingUtil;
 
 import lombok.RequiredArgsConstructor;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ContactServiceImpl implements ContactService{
@@ -34,6 +36,7 @@ public class ContactServiceImpl implements ContactService{
     @Override
     public ContactDTO createContact(Long userId,ContactRequest request){
         User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User Not Found: " + userId));
+        log.info("Creating new contact for {}",user.getEmail());
         Contact contact = mappingUtil.toContact(request);
         List<ContactEmail> emails = new ArrayList<>();
         for (EmailRequest email : request.getEmails()){
@@ -52,16 +55,19 @@ public class ContactServiceImpl implements ContactService{
         contact.setContactPhone(phones);
 
 
+
         contact.setUser(user);
         Contact savedContact = contactRepository.save(contact);
+        log.info("Contact created for user {}",savedContact.getUser().getEmail());
         return mappingUtil.toContactDTO(savedContact);
 
     }
     @Override 
     public ContactDTO updateContact(Long userId,Long id,ContactRequest request){
+        log.info("Updating Contact for {}",userId);
         Contact contact = contactRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("Contact Not Found: "+ id));
         if (!contact.getUser().getId().equals(userId)){
-            throw new RuntimeException("Invalid Request");
+            throw new UnauthorizedAccessException("Invalid Request");
         }
         contact.setFirstName(request.getFirstName());
         contact.setLastName(request.getLastName());
@@ -86,32 +92,39 @@ public class ContactServiceImpl implements ContactService{
         contact.getContactPhone().addAll(phones);
 
         Contact savedContact = contactRepository.save(contact);
+        log.info("Contact Updated for {}",savedContact.getUser().getEmail());
         return mappingUtil.toContactDTO(savedContact);
 
     }
 
     @Override
     public void deleteContact(Long userId,Long id){
+        log.info("Deleting Contact of {}",userId);
         Contact contact = contactRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Contact Not Found: " + id));
         if (!contact.getUser().getId().equals(userId)){
             throw new UnauthorizedAccessException("Invalid Request");
 
         }
+        log.info("Contact Deleted of {}",userId);
         contactRepository.delete(contact);
     }
 
     @Override
     public ContactDTO getContact(Long userId,Long id){
+        log.info("Getting Contact of {}",userId);
         Contact contact = contactRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("Contact Not Found: " + id));
         if (!contact.getUser().getId().equals(userId)){
             throw new UnauthorizedAccessException("Invalid Request");
         }
+        log.info("Retreived Contact for {}",userId);
         return mappingUtil.toContactDTO(contact);
 
     }
     @Override
     public List<ContactDTO> getAllContacts(Long userId){
+        log.info("Getting Contact of {}",userId);
         List<Contact> contacts = contactRepository.findByUserId(userId);
+        log.info("Retreived Contact for {}",userId);
         return contacts.stream().map(mappingUtil::toContactDTO).collect(Collectors.toList());
     }
 }
