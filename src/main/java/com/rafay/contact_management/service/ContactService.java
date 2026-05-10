@@ -13,4 +13,5 @@ public interface ContactService {
     void deleteContact(Long userId,Long id);
     ContactDTO getContact(Long userId,Long id);
     Page<ContactDTO> getAllContacts(Long userId, Pageable pageable);
+    Page<ContactDTO>searchContacts(Long userId,String query,Pageable pageable);
 }

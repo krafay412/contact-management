@@ -65,6 +65,13 @@ public class ContactController {
         Pageable pageable = PageRequest.of(page,size);
         return ResponseEntity.ok().body(contactService.getAllContacts(user.getId(),pageable));
     }
+    @GetMapping("/search")
+    public ResponseEntity<Page<ContactDTO>> searchContacts(Authentication auth, @RequestParam String query,@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size){
+        String email = auth.getName();
+        User user = userService.findByEmail(email);
+        Pageable pageable = PageRequest.of(page,size);
+        return ResponseEntity.ok().body(contactService.searchContacts(user.getId(),query,pageable));
+    }
 
 
 

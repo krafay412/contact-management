@@ -128,4 +128,11 @@ public class ContactServiceImpl implements ContactService{
         log.info("Retreived Contact for {}",userId);
         return contacts.map(mappingUtil::toContactDTO);
     }
+    @Override
+    public Page<ContactDTO>searchContacts(Long userId, String query, Pageable pageable){
+        log.info("Searching Contacts: {}",userId);
+        Page<Contact> contacts = contactRepository.searchContact(userId,query,pageable);
+        log.info("Retreived Contacts of {}",userId);
+        return contacts.map(mappingUtil::toContactDTO);
+    }
 }
